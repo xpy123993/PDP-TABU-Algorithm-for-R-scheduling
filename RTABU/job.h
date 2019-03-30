@@ -5,8 +5,8 @@
 #include <algorithm>
 using namespace std;
 
-const int ALLOCATE_MAX_M = 5;
-const int ALLOCATE_MAX_N = 30;
+const int ALLOCATE_MAX_M = 50;
+const int ALLOCATE_MAX_N = 350;
 
 const int JOB_PROCTIME_MIN = 1;
 const int JOB_PROCTIME_MAX = 10;

@@ -5,13 +5,13 @@
 using namespace std;
 
 //Parameter for tabu search
-const int TABU_LIST_LENGTH = 20;
-const int TABU_ITERATION_MAXN = 1000;
-const int TABU_UNCHANGED_ITERATION_MAXN = 200;
+const int TABU_LIST_LENGTH = 100;
+const int TABU_ITERATION_MAXN = 100;
+const int TABU_UNCHANGED_ITERATION_MAXN = 50;
 const bool TABU_UNCHANGED_ITERATION_MODE = true;
-const int TABU_RANDOM_SELECTION_ITERATION = 50;
+const int TABU_RANDOM_SELECTION_ITERATION = 20;
 
-const double TABU_ACCEPT_PROBABILITY = 0.2;
+const double TABU_ACCEPT_PROBABILITY = 0.02;
 
 /*
 
@@ -41,6 +41,8 @@ class TabuOptimizer
 	// 添加短期记忆、中期记忆表
 	Solution* tabu_list_1;
 	Solution* tabu_list_2;
+
+	int init_cost;
 
 	bool solution_exists(const Solution& solution)
 	{
@@ -195,6 +197,8 @@ public:
 
 		Solution best_solution = current_solution;
 
+		init_cost = evaluate(best_solution);
+
 		tick_count = GetTickCount();
 		int unchanged_iteration = 0, iteration = 0;
 		int last_solution_value = 0, current_value = evaluate(current_solution), best_value = evaluate(best_solution);
@@ -264,5 +268,10 @@ public:
 	double get_running_time()
 	{
 		return tick_count / 1000.0;
+	}
+
+	int get_inital_cost()
+	{
+		return init_cost;
 	}
 };

@@ -28,8 +28,22 @@ start_task(fp, Ms, sizeof(Ms) / sizeof(int), Ns, sizeof(Ns) / sizeof(int), Bs, s
 fclose(fp);
 ```
 
-to run algorithms only, use
+to design customized test case, first open a file for recording results:
 ```c++
+FILE *fp = fopen("result.csv", "w");
+write_record_header(fp); // csv column header
+```
+
+to run one test case (m=2, n=10, b=3)
+
+```c++
+current_config.M = 2; // set the number of machines
+current_config.N = 10;// set the number of tasks
+current_config.b = 3; // set lateness value of test generation (might be useless if use the first method)
+
+generate_test_data();
+
+int tasks = TASK_PDP | TASK_TABU | TASK_PSO; // select certain algorithms to run: pdp, tabu and pso.
 run_algorithm(FILE *fp, int tasks)
 ```
 the result will be dumped to fp handle.

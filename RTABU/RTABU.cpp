@@ -20,31 +20,8 @@ using namespace std;
 const int NUM_MAXN = 1000007;
 
 const int TASK_PSO = 1, TASK_LPT_EDD = 2, TASK_SPT_EDD = 4, TASK_MINC = 8, TASK_MINY = 16, TASK_TABU = 32, TASK_PDP = 64, TASK_TABU_RAND = 128;
-void start_task(FILE* record_file, int* M_array, int M_size, int* N_array, int N_size, double* B_array, int B_size, int case_number, int tasks);
-void pdp_load_test();
 
 ListOptimizer listOptimizer;
-
-int main()
-{
-	srand(time(0));
-	
-	int Ms[] = {2, 3, 5};
-	int Ns[] = {6, 8, 10, 12};
-	double Bs[] = {3, 5, 7};
-	int case_number = 10;
-
-	int tasks = TASK_PDP | TASK_TABU | TASK_TABU_RAND;
-
-	FILE* fp = fopen("result.csv", "w");
-	start_task(fp, Ms, sizeof(Ms) / sizeof(int), Ns, sizeof(Ns) / sizeof(int), Bs, sizeof(Bs) / sizeof(double), case_number, tasks);
-	fclose(fp);
-	
-	//pdp_load_test();
-	printf("program finished\n");
-
-	return 0;
-}
 
 void write_record_header(FILE *fp)
 {
@@ -125,8 +102,8 @@ void run_algorithm(FILE* fp, int tasks)
 	{
 		TabuOptimizer tabuOptimizer(true);
 
-		running_time = tabuOptimizer.get_running_time();
 		result = evaluate(tabuOptimizer.minimize());
+		running_time = tabuOptimizer.get_running_time();
 
 		if (tasks & TASK_PDP)
 		{
@@ -201,4 +178,91 @@ void pdp_load_test()
 	fclose(fp);
 }
 
+void large_instances()
+{
+	int Ms[] = { 30, 40, 50 };
+	int NpMs[] = { 3, 5, 7 };
 
+	// dont forget to modify maxn value in job.h
+
+	TabuOptimizer tabuOptimizer_orig(false);
+	TabuOptimizer tabuOptimizer_rand(true);
+
+	FILE *fp = fopen("large-result.csv", "w");
+	write_record_header(fp);
+
+	for (int i = 0; i < 3; i++)
+	{
+		current_config.M = Ms[i];
+		for (int j = 0; j < sizeof(NpMs) / sizeof(int); j++)
+		{
+			current_config.N = Ms[i] * NpMs[j];
+			current_config.b = 3;
+
+			for (int k = 0; k < 10; k++)
+			{
+				generate_test_data();
+
+				double result = evaluate(tabuOptimizer_orig.minimize());
+				insert_algorithm_record(fp, "TABU", negative_improve_rate(tabuOptimizer_orig.get_inital_cost(), result), tabuOptimizer_orig.get_running_time());
+
+				result = evaluate(tabuOptimizer_rand.minimize());
+				insert_algorithm_record(fp, "TABU-RAND", negative_improve_rate(tabuOptimizer_rand.get_inital_cost(), result), tabuOptimizer_rand.get_running_time());
+			}
+		}
+	}
+
+	fclose(fp);
+}
+
+void small_instances()
+{
+	int tasks = TASK_PDP | TASK_TABU | TASK_TABU_RAND, instances_per_case = 10;
+	current_config.b = 3;
+	FILE* fp = fopen("small-result.csv", "w");
+
+	write_record_header(fp);
+
+	current_config.M = 2;
+	for (current_config.N = 16; current_config.N <= 20; current_config.N++)
+	{
+		for (int i = 0; i < instances_per_case; i++)
+		{
+			generate_test_data();
+			run_algorithm(fp, tasks);
+		}
+	}
+
+	current_config.M = 3;
+	for (current_config.N = 12; current_config.N <= 16; current_config.N++)
+	{
+		for (int i = 0; i < instances_per_case; i++)
+		{
+			generate_test_data();
+			run_algorithm(fp, tasks);
+		}
+	}
+
+	current_config.M = 5;
+	for (current_config.N = 8; current_config.N <= 11; current_config.N++)
+	{
+		for (int i = 0; i < instances_per_case; i++)
+		{
+			generate_test_data();
+			run_algorithm(fp, tasks);
+		}
+	}
+	fclose(fp);
+}
+
+int main()
+{
+	srand(time(0));
+
+	large_instances();
+
+	//pdp_load_test();
+	printf("program finished\n");
+
+	return 0;
+}
